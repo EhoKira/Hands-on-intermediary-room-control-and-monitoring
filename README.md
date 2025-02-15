@@ -11,5 +11,5 @@ Developer: Lucas Aguiar
 
 Developer: Yhasmim Ferreira
 
-## Organograma
+## Kanban
 [Kanban LifeVault](https://github.com/users/Lucas-Ladislau/projects/4)
