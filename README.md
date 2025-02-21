@@ -5,10 +5,12 @@ Projeto intermediário do maloca das iCoisas
 <p align="center">
 <img src="https://github.com/Lucas-Ladislau/Hands-on-intermediary-room-control-and-monitoring/blob/main/Organograma/Organograma%20KOALA%20CORP.png" alt="Organograma Koala Corp" width="300" height="300">
 <p>
+  
 ## Kanban
+  
 [Kanban LifeVault](https://github.com/users/Lucas-Ladislau/projects/4)
 
-## Docunentações
+## Documentações
 [DoD](https://github.com/Lucas-Ladislau/Hands-on-intermediary-room-control-and-monitoring/blob/main/Documenta%C3%A7%C3%A3o/Defini%C3%A7%C3%A3o%20de%20Pronto%20(DoD).pdf)
 
 [Plano de teste](https://docs.google.com/document/d/1ccldrzzsL3C07hjIipVUa4fx6ijdOYYK/edit?usp=sharing&ouid=109419478006693650737&rtpof=true&sd=true)
