@@ -2,11 +2,14 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>  // Certifique-se de incluir a biblioteca para conexão segura
 #include <Adafruit_PN532.h>
+#include <NTPClient.h>   
+#include <TimeLib.h>  
 #include <PubSubClient.h>
 #include "DHT.h"
 #include <ESP32Servo.h>
 
-
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", -14400); 
 // Configuração do Wi-Fi
 const char* ssid = "SSID";
 const char* password = "PASSWORD";
@@ -33,6 +36,8 @@ const char* mqtt_temperatura = "atividades/temperatura";  // Tópico para cadast
 
 WiFiClientSecure espClient;  // Conexão segura com o MQTT
 PubSubClient client(espClient);  // Cliente MQTT
+
+String authorizedTags[] = { "b31c5510", "0x93 0x82 0xa7 0xd" };
 
 // Função para conectar ao MQTT
 void reconnect() {
@@ -78,6 +83,15 @@ void setup() {
   servo1.attach(SERVO_MOTOR);
 }
 
+bool isAuthorized(String uid) {
+  for (String tag : authorizedTags) {
+    if (tag == uid) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void cartao_valido_aproximado(){
   digitalWrite(led_vermelho, LOW);
   digitalWrite(led_verde, HIGH);
@@ -92,7 +106,11 @@ void loop() {
   }
   client.loop();
   
-  delay(2000);
+  delay(1000);
+
+  timeClient.update();
+  // Sincronizar o horário do NTP com a biblioteca TimeLib
+  setTime(timeClient.getEpochTime());
 
   uint8_t success = nfc.inListPassiveTarget();
 
@@ -110,16 +128,19 @@ void loop() {
       // Preparar os dados em formato JSON para enviar ao MQTT
       String postData;
       if (tag == "b31c5510") {
+        // Obter data e hora atual usando TimeLib
+        String currentTime = String(hour()) + ":" + String(minute()) + ":" + String(second());
+        String currentDate = String(day()) + "/" + String(month()) + "/" + String(year());
         cartao_valido_aproximado();
         abrirPorta();
-        postData = "{\"tag\":\"" + tag + "\", \"descricao\":\"Registro\",}";
+        String postData = "{\"acesso_autorizado\":true,\"hora\":\"" + currentTime + "\",\"data\":\"" + currentDate + "\"}";
+        Serial.println("Enviando para o MQTT: " + postData); 
+        client.publish(mqtt_registro_movimento, postData.c_str());
       } 
 
       // Enviar os dados para o broker MQTT
-      Serial.println("Enviando para o MQTT: " + postData);
-      client.publish(mqtt_registro_movimento, postData.c_str());
 
-      delay(2000);  // Aguarde antes de nova leitura
+      delay(1000);  // Aguarde antes de nova leitura
     }
   }
 
@@ -135,6 +156,15 @@ void loop() {
 
   // Exibe os dados no Serial Monitor
   Serial.printf("Temperatura: %.2f°C / Umidade: %.2f%%\n", temperatura, umidade);
+  String message;
+  if(temperatura > 32){
+    message = "{\"alerta\":\"temperatura\"}";
+    client.publish(mqtt_alerta_temperatura, message.c_str());
+  }else if(umidade >= 75){
+    message = "{\"alerta\":\"umidade\"}";
+    client.publish(mqtt_alerta_temperatura, message.c_str());
+    Serial.println("Enviando ao mqtt");
+  }
 
 }
 
