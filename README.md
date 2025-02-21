@@ -3,7 +3,7 @@ Projeto intermediário do maloca das iCoisas
 
 # Organograma
 <p align="center">
-<img src="https://github.com/Lucas-Ladislau/Hands-on-intermediary-room-control-and-monitoring/blob/main/Organograma/Organograma%20KOALA%20CORP.png" alt="Organograma Koala Corp" width="300" height="300">
+<img src="https://github.com/Lucas-Ladislau/Hands-on-intermediary-room-control-and-monitoring/blob/main/Organograma/Organograma%20KOALA%20CORP.png" alt="Organograma Koala Corp" width="400" height="400">
 <p>
   
 ## Kanban
