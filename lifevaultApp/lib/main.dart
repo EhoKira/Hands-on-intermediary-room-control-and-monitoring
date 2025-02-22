@@ -2,53 +2,67 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'database_helper.dart'; 
+import 'database_helper.dart';
 
 // 🔹 Conexão MQTT
 const String mqttServer = "URL";
 const int mqttPort = 8883;
-const String mqttUser = "USER";
-const String mqttPassword = "SENHA";
+const String mqttUser = "CLIENT";
+const String mqttPassword = "PASSWORD";
 const String mqttTopic = "atividades/registro";
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Garante inicialização correta do Flutter antes de chamadas assíncronas
+  WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper.instance.initDB();
   await conectarMQTT();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  List<Map<String, dynamic>> _registros = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRegistros();
+  }
+
+  // 🔹 Carrega os registros do banco
+  Future<void> _loadRegistros() async {
+    final registros = await DatabaseHelper.instance.getRegistros();
+    setState(() {
+      _registros = registros;
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('MQTT + SQLite')),
-        body: FutureBuilder<List<Map<String, dynamic>>>(
-          future: DatabaseHelper.instance.getRegistros(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Erro: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('Nenhum registro encontrado.'));
-            } else {
-              final registros = snapshot.data!;
-              return ListView.builder(
-                itemCount: registros.length,
-                itemBuilder: (context, index) {
-                  final registro = registros[index];
-                  return ListTile(
-                    title: Text('Acesso: ${registro['acesso_autorizado'] == 1 ? 'Autorizado' : 'Negado'}'),
-                    subtitle: Text('Data: ${registro['data']} - Hora: ${registro['hora']}'),
-                  );
-                },
-              );
-            }
-          },
+        body: RefreshIndicator(
+          onRefresh: _loadRegistros, // Atualiza os dados ao puxar para baixo
+          child: _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _registros.isEmpty
+                  ? Center(child: Text('Nenhum registro encontrado.'))
+                  : ListView.builder(
+                      itemCount: _registros.length,
+                      itemBuilder: (context, index) {
+                        final registro = _registros[index];
+                        return ListTile(
+                          title: Text('Acesso: ${registro['acesso_autorizado'] == 1 ? 'Autorizado' : 'Negado'}'),
+                          subtitle: Text('Data: ${registro['data']} - Hora: ${registro['hora']}'),
+                        );
+                      },
+                    ),
         ),
       ),
     );
@@ -104,6 +118,7 @@ Future<void> salvarNoSQLite(String mensagem) async {
       'data': data,
       'hora': hora,
     });
+
     print('✅ Registro salvo no SQLite');
   } catch (e) {
     print('❌ Erro ao salvar no SQLite: $e');
