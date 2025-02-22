@@ -35,6 +35,8 @@ dependencies:
   sqflite: ^2.3.0      # Para utilizar SQLite
   path_provider: ^2.1.2 # Para encontrar o diretório do banco de dados
   path: ^1.8.3         # Para manipulação de caminhos
+  flutter_local_notifications: ^17.2.1
+  permission_handler: ^10.2.0 
 
 
   # The following adds the Cupertino Icons font to your application.
