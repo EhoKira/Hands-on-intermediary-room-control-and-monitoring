@@ -1,5 +1,11 @@
 # Hands-on-intermediary-room-control-and-monitoring
-Projeto intermediário do maloca das iCoisas
+
+# Problema
+A segurança no armazenamento de bolsas de sangue é fundamental para garantir que elas estejam sempre em boas condições e disponíveis para quem precisa. Pensando nisso, o LifeVault foi criado para controlar o acesso a salas de refrigeração de maneira eficiente e confiável.
+
+Com um sistema inteligente, o LifeVault permite que apenas pessoas autorizadas entrem, evitando acessos indevidos. Além disso, ele monitora o ambiente para garantir que as condições dentro da sala estejam sempre adequadas. Para tornar tudo mais prático e seguro, o sistema sinaliza visualmente quando o acesso é permitido e abre a porta automaticamente, sem necessidade de contato manual.
+
+Com o LifeVault, hospitais e bancos de sangue podem ter mais tranquilidade e segurança no armazenamento, garantindo que tudo esteja sempre bem protegido e pronto para o uso.
 
 # Organograma
 <p align="center">
