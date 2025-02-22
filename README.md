@@ -26,4 +26,4 @@ Com o LifeVault, hospitais e bancos de sangue podem ter mais tranquilidade e seg
 
 [Progresso](https://docs.google.com/document/d/1m2jrjKM4lcF1I1r9wvH2YKSOY_r_DLHV/edit?usp=sharing&ouid=109419478006693650737&rtpof=true&sd=true)
 
-[Requisitos funcioanis ] (https://docs.google.com/document/d/1m2jrjKM4lcF1I1r9wvH2YKSOY_r_DLHV/edit?usp=sharing&ouid=109419478006693650737&rtpof=true&sd=true)
+[Requisitos funcioanis ](https://docs.google.com/document/d/1m2jrjKM4lcF1I1r9wvH2YKSOY_r_DLHV/edit?usp=sharing&ouid=109419478006693650737&rtpof=true&sd=true)
