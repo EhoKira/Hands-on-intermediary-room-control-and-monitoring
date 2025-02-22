@@ -1,6 +1,13 @@
 # Hands-on-intermediary-room-control-and-monitoring
 
 # Problema
+A segurança em hospitais pode ser comprometida por métodos de identificação vulneráveis e verificações ineficazes. Crachás físicos, embora comuns, são suscetíveis a falsificações, permitindo que pessoas não autorizadas acessem áreas críticas.
+
+Pensando nisso, o LifeVault foi desenvolvido para oferecer um controle de acesso mais seguro e preciso. Nesta versão, o sistema foi implementado para monitorar salas de refrigeração de bolsas de sangue, garantindo que apenas profissionais autorizados possam entrar. Com tecnologias avançadas de autenticação, o LifeVault reduz riscos de acessos indevidos e protege um dos recursos mais valiosos dos hospitais.
+
+Essa solução reforça a segurança, melhora a rastreabilidade e contribui para um ambiente hospitalar mais confiável e eficiente.
+
+# Solução
 A segurança no armazenamento de bolsas de sangue é fundamental para garantir que elas estejam sempre em boas condições e disponíveis para quem precisa. Pensando nisso, o LifeVault foi criado para controlar o acesso a salas de refrigeração de maneira eficiente e confiável.
 
 Com um sistema inteligente, o LifeVault permite que apenas pessoas autorizadas entrem, evitando acessos indevidos. Além disso, ele monitora o ambiente para garantir que as condições dentro da sala estejam sempre adequadas. Para tornar tudo mais prático e seguro, o sistema sinaliza visualmente quando o acesso é permitido e abre a porta automaticamente, sem necessidade de contato manual.
