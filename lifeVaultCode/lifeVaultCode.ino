@@ -2,25 +2,33 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>  // Certifique-se de incluir a biblioteca para conexão segura
 #include <Adafruit_PN532.h>
+#include <NTPClient.h>   
+#include <TimeLib.h>  
 #include <PubSubClient.h>
 #include "DHT.h"
 #include <ESP32Servo.h>
+#include <LiquidCrystal_I2C.h>
+ 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", -14400); 
 // Configuração do Wi-Fi
 const char* ssid = "SSID";
 const char* password = "PASSWORD";
 
 #define SERVO_MOTOR 27 
-// Configuração do sensor PN532 via I2C
 #define led_vermelho 33 
 #define led_verde 32
 #define SDA_PIN 21
 #define SCL_PIN 22
 #define DHT_PIN 4
+
 #define DHTTYPE DHT11
 DHT dht(DHT_PIN, DHTTYPE);
+
 Adafruit_PN532 nfc(SDA_PIN, SCL_PIN);
+
 Servo servo1;
 
 // Configuração do Broker MQTT
@@ -33,6 +41,8 @@ const char* mqtt_temperatura = "atividades/temperatura";  // Tópico para cadast
 
 WiFiClientSecure espClient;  // Conexão segura com o MQTT
 PubSubClient client(espClient);  // Cliente MQTT
+
+String authorizedTags[] = { "b31c5510", "dpo9xcd9" };
 
 // Função para conectar ao MQTT
 void reconnect() {
@@ -76,23 +86,49 @@ void setup() {
   dht.begin();
   Serial.println(F("DHT11 Iniciado!"));
   servo1.attach(SERVO_MOTOR);
+
+  lcd.init(); //Inicializa a comunicação com o display já conectado
+  lcd.clear(); //Limpa a tela do display
+  lcd.backlight();
+}
+
+bool isAuthorized(String uid) {
+  for (String tag : authorizedTags) {
+    if (tag == uid) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void cartao_valido_aproximado(){
   digitalWrite(led_vermelho, LOW);
   digitalWrite(led_verde, HIGH);
-  delay(2000);
+  delay(1000);
   digitalWrite(led_verde, LOW);
   digitalWrite(led_vermelho, HIGH);
 }
 
+void abrirPorta(){
+  servo1.write(0);    // Move o servo para a posição 0
+  delay(5000);          // Espera 5 segundo
+  servo1.write(90);   // Move o servo para a posição 90
+  delay(1000);          // Espera 1 segundo
+}
+
 void loop() {
+  lcd.setCursor(0, 0); //Coloca o cursor do display na coluna 1 e linha 1
+  lcd.print("Life Vault Acess");
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
   
-  delay(2000);
+  delay(1000);
+
+  timeClient.update();
+  // Sincronizar o horário do NTP com a biblioteca TimeLib
+  setTime(timeClient.getEpochTime());
 
   uint8_t success = nfc.inListPassiveTarget();
 
@@ -110,16 +146,27 @@ void loop() {
       // Preparar os dados em formato JSON para enviar ao MQTT
       String postData;
       if (tag == "b31c5510") {
+        lcd.setCursor(0, 1);  // Posiciona o cursor na segunda linha do display
+        lcd.print("Acess approved");
+        // Obter data e hora atual usando TimeLib
+        String currentTime = String(hour()) + ":" + String(minute()) + ":" + String(second());
+        String currentDate = String(day()) + "/" + String(month()) + "/" + String(year());
         cartao_valido_aproximado();
         abrirPorta();
-        postData = "{\"tag\":\"" + tag + "\", \"descricao\":\"Registro\",}";
-      } 
+        String postData = "{\"acesso_autorizado\":true,\"hora\":\"" + currentTime + "\",\"data\":\"" + currentDate + "\"}";
+        Serial.println("Enviando para o MQTT: " + postData); 
+        lcd.clear(); 
+        client.publish(mqtt_registro_movimento, postData.c_str());
+      } else{
+        lcd.setCursor(0, 1);  // Posiciona o cursor na segunda linha do display
+        lcd.print("Acess denied");
+        delay(1000);
+        lcd.clear(); 
+      }
 
       // Enviar os dados para o broker MQTT
-      Serial.println("Enviando para o MQTT: " + postData);
-      client.publish(mqtt_registro_movimento, postData.c_str());
 
-      delay(2000);  // Aguarde antes de nova leitura
+      delay(1000);  // Aguarde antes de nova leitura
     }
   }
 
@@ -135,12 +182,16 @@ void loop() {
 
   // Exibe os dados no Serial Monitor
   Serial.printf("Temperatura: %.2f°C / Umidade: %.2f%%\n", temperatura, umidade);
+  String postData = "{\"temperatura\": " + String(temperatura, 2) + " \"ºC\", \"umidade\": " + String(umidade, 2) + "%}";
+  String message;
+  if(temperatura > 32){
+    message = "{\"alerta\":\"temperatura\"}";
+    client.publish(mqtt_alerta_temperatura, message.c_str());
+  }else if(umidade >= 75){
+    message = "{\"alerta\":\"umidade\"}";
+    client.publish(mqtt_alerta_temperatura, message.c_str());
+    Serial.println("Enviando ao mqtt");
+  }
 
 }
 
-void abrirPorta(){
-  servo1.write(0);    // Move o servo para a posição 0
-  delay(1000);          // Espera 1 segundo
-  servo1.write(90);   // Move o servo para a posição 90
-  delay(1000);          // Espera 1 segundo
-}
